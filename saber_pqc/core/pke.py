@@ -8,6 +8,8 @@ L = 3
 Q = 8192
 MU = 10
 SEED_BYTES = 32
+EP = 10
+EQ = 13
 
 def generate_pke_keypair():
     #Generate Uniform Seed
@@ -20,6 +22,11 @@ def generate_pke_keypair():
     seed_s = os.urandom(SEED_BYTES)
     s = sample_secret_vector(seed_s)
 
+    #Compute b= A^T * s + h (mod q)
+    h = computer_rounding_constant()
+    b = matrix_vector_transpose(A, s, h)
+
+    return seedA, b, s
 
 
 
@@ -46,14 +53,14 @@ def generate_uniform_poly(shake) -> List[int]:
     for _ in range(N):
         val = raw[index] | (raw[index + 1] << 8)
         index += 2
-        poly.append(val % 0)
+        poly.append(val % Q)
 
     return poly
 
 
 #Secret Smapling
 
-def sample_secret_vectyor(seed:bytes) -> List[List[int]]:
+def sample_secret_vector(seed:bytes) -> List[List[int]]:
     shake = hashlib.shake_128(seed)
     s = []
 
@@ -61,7 +68,7 @@ def sample_secret_vectyor(seed:bytes) -> List[List[int]]:
         poly = sample_cbd_poly(shake)
         s.append(poly)
 
-        return s
+    return s
     
 def sample_cbd_poly(shake) -> List[int]:
     #Sample from centered binomial distribution
@@ -71,5 +78,69 @@ def sample_cbd_poly(shake) -> List[int]:
     buffer = shake.digest(total_bytes)
 
     poly = []
-    ofset = 0
+    offset = 0
+
+    for _ in range(N):
+        chunk = buffer[offset:offset + bytes_per_coeff]
+        offset += bytes_per_coeff
+        poly.append(centered_binomial(chunk))
     
+    return poly
+
+def centered_binomial(data: bytes) -> int:
+
+    bits = bin(int.from_bytes(data, byteorder="big")).removeprefix('0b')
+
+    a = sum(int(b) for b in bits[:MU])
+    b = sum(int(b) for b in bits[MU:2 * MU])
+
+    return a - b
+
+
+#Polynomial Math ...
+def matrix_vector_transpose(A, s, h):
+    #Computes b = A^T * s + h (mod Q)
+
+    b = []
+
+    for i in range(L):
+        acc = [0] * N
+        for j in range(L):
+            prod = poly_mul(A[j][i], s[j])
+            acc = poly_add(acc, prod)
+        acc = poly_add_constant(acc, h)
+        acc = poly_mod(acc, Q)
+        b.append(acc)
+    return b
+
+def poly_add(a, b):
+    return [(x + y) for x, y in zip(a, b)]
+
+def poly_add_constant(a, c):
+    return [(x + c) for x in a]
+
+
+def poly_mod(a, mod):
+    return [x % mod for x in a]
+
+def poly_mul(a, b):
+    # Naive polynomial multiplication modulo (x^N + 1).
+
+    result = [0] * N
+
+    for i in range(N):
+        for j in range(N):
+            idx = i + j
+            val = a[i] * b[j]
+
+            if idx < N:
+                result[idx] += val
+            else:
+                # wrap around with negation because x^N = -1
+                result[idx - N] -= val
+
+    return result
+
+#Constants for Saber
+def computer_rounding_constant():
+    return 2 ^ (EQ - EP - 1)
