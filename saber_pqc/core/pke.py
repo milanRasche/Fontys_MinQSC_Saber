@@ -57,7 +57,7 @@ def generate_uniform_poly(shake) -> List[int]:
 
     return poly
 
-
+#TODO: Stuff down here needs to go into a different file as its used in other palces.
 #Secret Smapling
 
 def sample_secret_vector(seed:bytes) -> List[List[int]]:
@@ -113,6 +113,19 @@ def matrix_vector_transpose(A, s, h):
         b.append(acc)
     return b
 
+def matrix_vector_mul(A, s):
+    result = []
+
+    for i in range(L):
+        acc = [0] * N
+        for j in range(L):
+            prod = poly_mul(A[i][j], s[j])
+            acc = poly_add(acc, prod)
+    acc = poly_mod(acc, Q)
+    result.append(acc)
+
+    return result
+
 def poly_add(a, b):
     return [(x + y) for x, y in zip(a, b)]
 
@@ -144,3 +157,13 @@ def poly_mul(a, b):
 #Constants for Saber
 def computer_rounding_constant():
     return 2 ^ (EQ - EP - 1)
+
+#Why is this even here in this file ._.
+def encode_message(m: bytes):
+    bits = []
+    for byte in m:
+        for i in range(8):
+            bits.append((byte >> i) & 1)
+
+    poly = [bit * (Q // 2) for bit in bits[:N]]
+    return poly
