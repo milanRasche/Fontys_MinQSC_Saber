@@ -2,6 +2,8 @@
 #from core.keygen import generate_saber_kem_keypair
 from core.pke import generate_pke_keypair
 from core.encrypt import encrypy
+from core.decrypt import decrypt
+
 
 
 def main():
@@ -12,7 +14,11 @@ def main():
     ciphertext = encrypy(pk, message)
 
     print("Generated Ciphertext")
+    print(message)
     print(ciphertext)
+
+    decrypt_message = decrypt(s, ciphertext)
+    print(decrypt_message)
 
 
 if __name__ == "__main__":

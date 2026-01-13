@@ -22,6 +22,9 @@ def encrypy(pk, message: bytes):
 
     bp = matrix_vector_mul(A, sp)
 
+    print("DEBUG bp length:", len(bp))
+    print("DEBUG bp[0] length:", len(bp[0]))
+
     acc = [0] * len(bp[0])
     for i in range(len(sp)):
         prod = poly_mul(b[i], sp[i])

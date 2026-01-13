@@ -19,7 +19,7 @@ def generate_pke_keypair():
     A = generate_matrix_A(seedA)
 
     #Sample secret vectore from binomial distribution
-    seed_s = os.urandom(SEED_BYTES)
+    seed_s = os.urandom(SEED_BYTES) #Not True Random but close enough for testing purposes
     s = sample_secret_vector(seed_s)
 
     #Compute b= A^T * s + h (mod q)
@@ -121,8 +121,8 @@ def matrix_vector_mul(A, s):
         for j in range(L):
             prod = poly_mul(A[i][j], s[j])
             acc = poly_add(acc, prod)
-    acc = poly_mod(acc, Q)
-    result.append(acc)
+        acc = poly_mod(acc, Q)
+        result.append(acc)
 
     return result
 
