@@ -1,4 +1,4 @@
-from params_all import (
+from core.params_all import (
     Q,
     N
 )

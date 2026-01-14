@@ -1,11 +1,10 @@
-from params_all import(
-    L,
+from core.params_all import(
     Q,
     N
 )
 
 #Polynomial Math used in Saber
-def matrix_vector_transpose(A, s, h):
+def matrix_vector_transpose(A, s, h, L):
     #Computes b = A^T * s + h (mod Q)
 
     b = []
@@ -20,7 +19,7 @@ def matrix_vector_transpose(A, s, h):
         b.append(acc)
     return b
 
-def matrix_vector_mul(A, s):
+def matrix_vector_mul(A, s, L):
     result = []
 
     for i in range(L):
@@ -60,16 +59,3 @@ def poly_mul(a, b):
                 result[idx - N] -= val
 
     return result
-
-#Constants for Saber
-def computer_rounding_constant(EQ, EP):
-    return 2 ^ (EQ - EP - 1)
-
-def encode_message(m: bytes):
-    bits = []
-    for byte in m:
-        for i in range(8):
-            bits.append((byte >> i) & 1)
-
-    poly = [bit * (Q // 2) for bit in bits[:N]]
-    return poly

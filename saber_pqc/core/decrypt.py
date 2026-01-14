@@ -1,9 +1,9 @@
-from params_all import (
+from core.params_all import (
     Q,
     N
 )
 
-from algos_polynomial_math import (
+from core.algos_polynomial_math import (
     poly_mul,
     poly_add,
     poly_mod

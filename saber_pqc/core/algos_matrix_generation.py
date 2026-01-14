@@ -2,6 +2,11 @@ import hashlib
 
 from typing import List
 
+from core.params_all import (
+    Q,
+    N
+)
+
 def generate_matrix_A(seedA: bytes, L) -> List[List[List[int]]]:
     #Generates the matrix A needed for pke keypair generation. Deterministic from seedA
     shake = hashlib.shake_128(seedA)

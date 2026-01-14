@@ -2,7 +2,7 @@ import hashlib
 
 from typing import List
 
-from params_all import (
+from core.params_all import (
     MU,
     N,
     

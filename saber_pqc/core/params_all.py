@@ -7,5 +7,5 @@ EQ = 13
 MU = 10
 EP = 10
 
-def compute_rounding_constant(EQ, EP):
+def compute_rounding_constant():
     return 2 ^ (EQ - EP - 1)
