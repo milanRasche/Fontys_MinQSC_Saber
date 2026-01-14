@@ -6,6 +6,7 @@ from core.algos_secret_sampling import sample_secret_vector
 
 from core.params_all import (
     Q,
+    N,
     SEED_BYTES
 )
 
@@ -14,10 +15,6 @@ from core.algos_polynomial_math import (
     poly_add,
     poly_mod,
     poly_mul
-)
-
-from core.algos_encoding import (
-    encode_message
 )
 
 def encrypy(pk, message: bytes, L):
@@ -44,3 +41,12 @@ def encrypy(pk, message: bytes, L):
         "bp": bp,
         "vp": vp
     }
+
+def encode_message(m: bytes):
+    bits = []
+    for byte in m:
+        for i in range(8):
+            bits.append((byte >> i) & 1)
+
+    poly = [bit * (Q // 2) for bit in bits[:N]]
+    return poly
