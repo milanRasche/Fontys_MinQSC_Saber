@@ -1,5 +1,3 @@
-#Nothing here yet just doing some general scafolding
-#from core.keygen import generate_saber_kem_keypair
 from core.pke import generate_pke_keypair
 from core.encrypt import encrypy
 from core.decrypt import decrypt

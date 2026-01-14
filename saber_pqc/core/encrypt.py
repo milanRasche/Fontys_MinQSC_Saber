@@ -1,14 +1,23 @@
 import os
-from .pke import (
-    generate_matrix_A,
-    sample_secret_vector,
+
+from algos_matrix_generation import generate_matrix_A
+
+from algos_secret_sampling import sample_secret_vector
+
+from params_all import (
+    Q,
+    SEED_BYTES
+)
+
+from algos_polynomial_math import (
     matrix_vector_mul,
     poly_add,
     poly_mod,
-    poly_mul,
-    encode_message,
-    SEED_BYTES,
-    Q
+    poly_mul
+)
+
+from algos_encoding import (
+    encode_message
 )
 
 def encrypy(pk, message: bytes):
@@ -21,9 +30,6 @@ def encrypy(pk, message: bytes):
     sp = sample_secret_vector(seed_sp)
 
     bp = matrix_vector_mul(A, sp)
-
-    print("DEBUG bp length:", len(bp))
-    print("DEBUG bp[0] length:", len(bp[0]))
 
     acc = [0] * len(bp[0])
     for i in range(len(sp)):

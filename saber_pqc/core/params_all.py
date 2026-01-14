@@ -6,3 +6,6 @@ Q = 8192 #2^13
 EQ = 13
 MU = 10
 EP = 10
+
+def compute_rounding_constant(EQ, EP):
+    return 2 ^ (EQ - EP - 1)

@@ -1,9 +1,12 @@
-from .pke import (
-    poly_mul,
-    poly_add,
-    poly_mod,
+from params_all import (
     Q,
     N
+)
+
+from algos_polynomial_math import (
+    poly_mul,
+    poly_add,
+    poly_mod
 )
 
 def decrypt(sk, ciphertext):
