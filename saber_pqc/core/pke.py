@@ -2,14 +2,19 @@ import os
 import hashlib
 from typing import List
 
-#Params Saber
+from 
+
+#Params Constant across all 3 Saber Versions
 N = 256
+Q = 8192 #2^13
+EQ = 13
+
+#Params Saber
 L = 3
-Q = 8192
 MU = 10
 SEED_BYTES = 32
 EP = 10
-EQ = 13
+ET = 3
 
 def generate_pke_keypair():
     #Generate Uniform Seed
@@ -95,75 +100,3 @@ def centered_binomial(data: bytes) -> int:
     b = sum(int(b) for b in bits[MU:2 * MU])
 
     return a - b
-
-
-#Polynomial Math ...
-def matrix_vector_transpose(A, s, h):
-    #Computes b = A^T * s + h (mod Q)
-
-    b = []
-
-    for i in range(L):
-        acc = [0] * N
-        for j in range(L):
-            prod = poly_mul(A[j][i], s[j])
-            acc = poly_add(acc, prod)
-        acc = poly_add_constant(acc, h)
-        acc = poly_mod(acc, Q)
-        b.append(acc)
-    return b
-
-def matrix_vector_mul(A, s):
-    result = []
-
-    for i in range(L):
-        acc = [0] * N
-        for j in range(L):
-            prod = poly_mul(A[i][j], s[j])
-            acc = poly_add(acc, prod)
-        acc = poly_mod(acc, Q)
-        result.append(acc)
-
-    return result
-
-def poly_add(a, b):
-    return [(x + y) for x, y in zip(a, b)]
-
-def poly_add_constant(a, c):
-    return [(x + c) for x in a]
-
-
-def poly_mod(a, mod):
-    return [x % mod for x in a]
-
-def poly_mul(a, b):
-    # Naive polynomial multiplication modulo (x^N + 1).
-
-    result = [0] * N
-
-    for i in range(N):
-        for j in range(N):
-            idx = i + j
-            val = a[i] * b[j]
-
-            if idx < N:
-                result[idx] += val
-            else:
-                # wrap around with negation because x^N = -1
-                result[idx - N] -= val
-
-    return result
-
-#Constants for Saber
-def computer_rounding_constant():
-    return 2 ^ (EQ - EP - 1)
-
-#Why is this even here in this file ._.
-def encode_message(m: bytes):
-    bits = []
-    for byte in m:
-        for i in range(8):
-            bits.append((byte >> i) & 1)
-
-    poly = [bit * (Q // 2) for bit in bits[:N]]
-    return poly

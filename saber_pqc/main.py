@@ -17,8 +17,8 @@ def main():
     print(message)
     print(ciphertext)
 
-    decrypt_message = decrypt(s, ciphertext)
-    print(decrypt_message)
+    decrypted_message = decrypt(s, ciphertext)
+    print(decrypted_message)
 
 
 if __name__ == "__main__":
