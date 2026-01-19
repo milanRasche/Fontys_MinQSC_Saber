@@ -1,48 +1,44 @@
+import hashlib
+
 from core.params_all import (
     Q,
-    N
+    N,
+    compute_compression_shift_p,
+    compute_compression_shift_t
 )
-
 from core.algos_polynomial_math import (
     poly_mul,
     poly_add,
     poly_mod
 )
+from core.algos_compressiong_decompression import decompress_poly
 
-def decrypt(sk, ciphertext):
-    s = sk
-    bp = ciphertext["bp"]
-    vp = ciphertext["vp"]
+def decrypt(sk, ciphertext, L, ET):
+    """
+    Decrypt AES key using SABER PKE + shared secret
+    """
+    u = ciphertext["u"]
+    v = ciphertext["v"]
+    encrypted_key = ciphertext["encrypted_key"]
 
+    SHIFT_P = compute_compression_shift_p()
+    SHIFT_T = compute_compression_shift_t(ET)
+
+    # ---- decompress u and v ----
+    u_full = [decompress_poly(p, SHIFT_P) for p in u]
+    v_full = decompress_poly(v, SHIFT_T)
+
+    # ---- compute s^T * u (optional, needed if message were embedded) ----
     acc = [0] * N
-    for i in range(len(s)):
-        prod = poly_mul(s[i], bp[i])
+    for i in range(L):
+        prod = poly_mul(sk[i], u_full[i])
         acc = poly_add(acc, prod)
-
     acc = poly_mod(acc, Q)
 
-    m_poly = [(v - a) % Q for v, a in zip(vp, acc)]
+    # ---- derive shared secret from v ----
+    v_bytes = b"".join(int.to_bytes(c, 2, "little") for c in v)
+    shared_secret = hashlib.shake_128(v_bytes).digest(len(encrypted_key))
 
-    message = decode_message(m_poly)
-    return message
-
-def decode_message(m_poly):
-    bits = []
-    threshold = Q // 4
-
-    for coeff in m_poly:
-        if coeff > threshold:
-            bits.append(1)
-        else:
-            bits.append(0)
-
-    # Convert bits → bytes
-    out = bytearray()
-    for i in range(0, len(bits), 8):
-        byte = 0
-        for j in range(8):
-            if i + j < len(bits):
-                byte |= bits[i + j] << j
-        out.append(byte)
-
-    return bytes(out)
+    # ---- recover AES key ----
+    aes_key = bytes([a ^ b for a, b in zip(encrypted_key, shared_secret)])
+    return aes_key

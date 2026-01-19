@@ -4,9 +4,8 @@ from core.params_all import(
 )
 
 #Polynomial Math used in Saber
-def matrix_vector_transpose(A, s, h, L):
-    #Computes b = A^T * s + h (mod Q)
-
+def matrix_vector_transpose(A, s, L):
+    # Computes A^T * s (mod Q)
     b = []
 
     for i in range(L):
@@ -14,7 +13,6 @@ def matrix_vector_transpose(A, s, h, L):
         for j in range(L):
             prod = poly_mul(A[j][i], s[j])
             acc = poly_add(acc, prod)
-        acc = poly_add_constant(acc, h)
         acc = poly_mod(acc, Q)
         b.append(acc)
     return b
