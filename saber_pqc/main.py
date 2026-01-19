@@ -1,5 +1,6 @@
 import time
 import os
+import pickle
 import psutil
 
 from core.pke import generate_pke_keypair
@@ -29,11 +30,13 @@ def main():
         end_keygen = time.perf_counter()
         pk = {"seedA": seedA, "b": b}
         keygen_time_ms = (end_keygen - start_keygen) * 1000
-        keygen_ram_mb = process.memory_info().rss / (1024 * 1024)  # in MB
 
         total_enc = 0.0
         total_dec = 0.0
         peak_ram_mb = 0.0
+
+        total_ciphertext_size = 0
+        max_ciphertext_size = 0
 
         for _ in range(RUNS):
             aes_key = os.urandom(32)
@@ -52,6 +55,12 @@ def main():
             ram_after = process.memory_info().rss / (1024 * 1024)
             peak_ram_mb = max(peak_ram_mb, ram_after)
 
+            # Track ciphertext size
+            c_bytes = pickle.dumps(ciphertext)
+            csize = len(c_bytes)
+            total_ciphertext_size += csize
+            max_ciphertext_size = max(max_ciphertext_size, csize)
+
             total_enc += (t1 - t0)
             total_dec += (t3 - t2)
 
@@ -63,12 +72,15 @@ def main():
 
         avg_enc_ms = (total_enc / RUNS) * 1000
         avg_dec_ms = (total_dec / RUNS) * 1000
+        avg_ciphertext_size = total_ciphertext_size / RUNS
 
         print(f"Keygen time:        {keygen_time_ms:.3f} ms")
         print(f"Avg encryption:     {avg_enc_ms:.3f} ms")
         print(f"Avg decryption:     {avg_dec_ms:.3f} ms")
         print(f"Peak RAM usage:     {peak_ram_mb:.2f} MB")
-        print(f"Avg enc+dec total:  {avg_enc_ms + avg_dec_ms:.3f} ms\n")
+        print(f"Avg enc+dec total:  {avg_enc_ms + avg_dec_ms:.3f} ms")
+        print(f"Avg ciphertext size: {avg_ciphertext_size} bytes")
+        print(f"Max ciphertext size: {max_ciphertext_size} bytes\n")
 
 
 if __name__ == "__main__":
