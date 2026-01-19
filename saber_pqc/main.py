@@ -8,9 +8,9 @@ from core.decrypt import decrypt
 RUNS = 100
 
 VARIANTS = [
-    ("LightSaber", 2, 4),
-    ("Saber",      3, 3),
-    ("FireSaber",  4, 3),
+    ("LightSaber", 2, 3),
+    ("Saber",      3, 4),
+    ("FireSaber",  4, 6),
 ]
 
 
